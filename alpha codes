@@ -1,0 +1,883 @@
+100 Alpha Ideas — Specs Pack (WorldQuant-ready)
+Each alpha below includes: Intuition, Signal (pseudo), Universe/Frequency, Regions where it works best, Backtest Specs, Risk Controls.
+
+---
+
+1. 12-Month Cross-Sectional Momentum
+   Intuition: Past 12-month winners keep winning.
+   Signal: rank(close*t / close*{t-252}) → long top decile, short bottom decile.
+   Universe/Frequency: Large & mid-cap equities; rebalance monthly.
+   Regions: US, Europe, Australia.
+   Backtest: 10+ yrs, skip 1–10d post formation, include costs.
+   Risk: Sector neutral, cap per stock, max leverage.
+
+---
+
+2. 5-Day Short-Term Reversal
+   Intuition: Losers rebound in short term.
+   Signal: -5d return; long worst decile, short best.
+   Universe: Liquid equities; daily.
+   Regions: US small & mid-cap, EU small-cap.
+   Backtest: 5+ yrs, include costs.
+   Risk: Per stock cap, stop-loss.
+
+---
+
+3. High Volatility Skew Reversion
+   Intuition: IV skew mean-reverts.
+   Signal: skew = IV_put - IV_call; high skew → short.
+   Universe: Options; weekly/monthly.
+   Regions: US, Europe.
+   Backtest: Option IV data; costs.
+   Risk: Hedge underlying, avoid events.
+
+---
+
+4. Volume Surge Breakouts
+   Intuition: Volume spikes precede continuation.
+   Signal: volume_t / avg20d_vol; if > threshold and price > 20d high → long.
+   Universe: Equities; daily.
+   Regions: US, Canada, UK.
+   Backtest: Volume filters, include slippage.
+   Risk: Stop-loss ATR, liquidity filter.
+
+---
+
+5. Earnings Revision Momentum
+   Intuition: Upward revisions drift.
+   Signal: Δ EPS estimate > threshold → long.
+   Universe: Large & mid-cap; event.
+   Regions: US, Europe, HK, Japan.
+   Backtest: 5+ yrs; lag news.
+   Risk: Avoid volatile names.
+
+---
+
+6. Insider Buying Signal
+   Intuition: Insiders buy before gains.
+   Signal: insider buys > threshold → long.
+   Universe: US; weekly/monthly.
+   Regions: US, Australia.
+   Backtest: Use filing delays.
+   Risk: Avoid low float.
+
+---
+
+7. P/E Mean Reversion
+   Intuition: Extreme valuations revert.
+   Signal: zscore(current_PE, hist_window); high → short, low → long.
+   Universe: Global equities; monthly.
+   Regions: Developed mkts.
+   Backtest: Clean PE data.
+   Risk: Avoid loss-making firms.
+
+---
+
+8. January Effect (Seasonality)
+   Intuition: Small caps rally in Jan.
+   Signal: Long small caps during January.
+   Universe: Equities; yearly seasonality.
+   Regions: US, Europe.
+   Backtest: Decades of data.
+   Risk: Small size allocation.
+
+---
+
+9. Dividend Carry
+   Intuition: High dividend yield outperforms.
+   Signal: div_yield - funding_cost; rank.
+   Universe: Equities; monthly.
+   Regions: US, EU, AUS.
+   Backtest: Withholding tax.
+   Risk: Avoid cutters.
+
+---
+
+10. FX Rate Change Momentum
+    Intuition: FX follows rate surprises.
+    Signal: rate surprise > threshold → long.
+    Universe: FX majors; daily/weekly.
+    Regions: G10.
+    Backtest: Include carry; news lag.
+    Risk: Crisis regime filter.
+
+---
+
+... 11) Cointegration Pairs (Sector)
+Intuition: Co-integrated pairs revert to a stable spread.
+Signal (pseudo):
+beta = OLS(price_A, price_B) # rolling
+spread = price_A - beta \* price_B
+z = (spread - mean(spread_window))/std(spread_window)
+if z > 2: short A, long B
+if z < -2: long A, short B
+exit when |z| < 0.5
+Universe/Frequency: Sector stocks or ETFs; daily.
+Regions: US, EU.
+Backtest: Rolling cointegration test; OOS validation.
+Risk: Pair concentration, stop on divergence.
+
+---
+
+12. ATR Breakout (Intraday)
+    Intuition: Breakouts beyond ATR indicate momentum.
+    Signal (pseudo):
+    atr = ATR(14)
+    if price > prior_N_high + k _ atr: buy
+    if price < prior_N_low - k _ atr: short
+    exit via trailing ATR stop
+    Universe/Frequency: Futures, liquid equities; intraday.
+    Regions: US futures, FX.
+    Backtest: Tick/1-min data preferred.
+    Risk: Slippage, false breakouts.
+
+---
+
+13. Earnings Drift with Volume
+    Intuition: Surprise + high volume signals stronger drift.
+    Signal (pseudo):
+    if surprise > s and post_vol > avg_vol\*factor: buy at close
+    hold H days
+    Universe/Frequency: Equities; event-driven.
+    Regions: US, EU.
+    Backtest: Use announcement timestamps.
+    Risk: Avoid low float; cap position.
+
+---
+
+14. Short Interest Reversal
+    Intuition: Very high short interest can reverse when squeezes occur.
+    Signal (pseudo):
+    if short_interest_pct > threshold and daily_buys > avg_buy_volume\*factor: buy
+    Universe/Frequency: Equities; weekly.
+    Regions: US, UK.
+    Backtest: Use borrow cost, locate failures.
+    Risk: Unlimited short risk; prefer long bias.
+
+---
+
+15. Quality Minus Junk
+    Intuition: Firms with high profitability & low leverage outperform low-quality firms.
+    Signal (pseudo):
+    quality_score = ROE + gross_margin - leverage_metric
+    signal = rank(quality_score)
+    long top, short bottom
+    Universe/Frequency: Equities; monthly.
+    Regions: Global developed markets.
+    Backtest: Factor backtest with controls.
+    Risk: Sector biases; cap exposure.
+
+---
+
+16. Momentum on Analyst Target Upgrades
+    Intuition: Target upgrades produce price drift.
+    Signal (pseudo):
+    if analyst raises target by > x%: buy at close
+    hold H days
+    Universe/Frequency: Equities; event.
+    Regions: US, EU.
+    Backtest: Timestamped analyst data.
+    Risk: Avoid low-liquidity names.
+
+---
+
+17. Volatility Skew Momentum (FX Options)
+    Intuition: Changes in skew reflect directional expectations.
+    Signal (pseudo):
+    skew*change = skew_t - skew*{t-1}
+    if skew_change > threshold: trade directional option spread
+    Universe/Frequency: FX options; weekly.
+    Regions: G10 FX.
+    Backtest: Option pricing dynamics; hedging costs.
+    Risk: Large moves; margin.
+
+---
+
+18. ETF Arbitrage (Premium/Discount)
+    Intuition: ETFs trading far from NAV revert.
+    Signal (pseudo):
+    premium = ETF_price - NAV
+    if premium > threshold: short ETF buy basket
+    if premium < -threshold: buy ETF short basket
+    Universe/Frequency: Liquid ETFs; intraday/daily.
+    Regions: US, EU.
+    Backtest: Include creation/redemption costs.
+    Risk: Tracking error, liquidity mismatch.
+
+---
+
+19. Momentum-Volatility Hybrid
+    Intuition: Momentum stronger when realized volatility low.
+    Signal (pseudo):
+    mom = rank(returns_60d)
+    if realized_vol_20d < vol_threshold: overweight mom
+    else: reduce exposure
+    Universe/Frequency: Equities/futures; weekly.
+    Regions: Global.
+    Backtest: Interaction terms tests.
+    Risk: Vol regime shifts.
+
+---
+
+20. Macro Surprise Trading
+    Intuition: Macroeconomic surprises move asset returns.
+    Signal (pseudo):
+    surprise = actual - consensus
+    if surprise > 0: buy asset class historically sensitive
+    Universe/Frequency: FX, rates, equities; event-driven.
+    Regions: G10 mainly.
+    Backtest: Use historical surprise data.
+    Risk: Data revisions, timing.
+
+---
+
+21. Cross-Sectional Liquidity Premium
+    Intuition: Stocks with low liquidity but decent fundamentals can deliver liquidity premium.
+    Signal (pseudo):
+    score = (fundamental_score) - alpha\*liquidity_rank
+    long top scores
+    Universe/Frequency: Small/mid caps; monthly.
+    Regions: US, EM.
+    Backtest: Include impact model.
+    Risk: Market impact, capacity limits.
+
+---
+
+22. Mean Reversion on Intraday VWAP Bands
+    Intuition: Price extremes vs VWAP revert intraday.
+    Signal (pseudo):
+    z = (price - VWAP)/intraday_std
+    if z>z_th: short until VWAP
+    if z<-z_th: long until VWAP
+    Universe/Frequency: Liquid equities/futures; intraday.
+    Regions: US, EU.
+    Backtest: High-frequency sim.
+    Risk: Spread widening, market microstructure.
+
+---
+
+23. Thematic Momentum (EV Supply Chain)
+    Intuition: Theme-specific winners propagate across suppliers.
+    Signal (pseudo):
+    theme_score = aggregate_momentum(suppliers_list)
+    long top suppliers
+    Universe/Frequency: Thematic equities; monthly.
+    Regions: Global.
+    Backtest: Avoid survivorship bias.
+    Risk: Theme reversals.
+
+---
+
+24. Cross-Border Arbitrage (ADR vs Local)
+    Intuition: Price dislocations between ADR and local-listed underlying.
+    Signal (pseudo):
+    spread = ADR_price - adjusted_local_price
+    trade when spread > threshold
+    Universe/Frequency: ADRs; daily.
+    Regions: US vs local markets (China, India).
+    Backtest: Currency, liquidity, settlement costs.
+    Risk: Settlement/custody, trading hours mismatch.
+
+---
+
+25. ETF Flow Momentum
+    Intuition: Large ETF inflows push component prices up.
+    Signal (pseudo):
+    if ETF_flow_t > avg_flow\*factor: long top holdings proportionally
+    Universe/Frequency: ETF constituents; daily/weekly.
+    Regions: US, EU.
+    Backtest: Use flow data; account for fees.
+    Risk: Rebalancing, crowding.
+
+---
+
+26. Sector Rotation via Relative Strength
+    Intuition: Sectors with relative strength continue to outperform.
+    Signal (pseudo):
+    rs = price_sector / price_market
+    rank sectors; overweight top K
+    Universe/Frequency: Sector ETFs; monthly.
+    Regions: US, EU.
+    Backtest: Sector correlation control.
+    Risk: Regime change.
+
+---
+
+27. Cross-Asset Volatility Carry
+    Intuition: Short about overpriced implied vol across assets.
+    Signal (pseudo):
+    carry = IV_asset - realized_vol_asset
+    sell vol where carry high
+    Universe/Frequency: Options on equities, FX, commodities; monthly.
+    Regions: US primarily.
+    Backtest: Include margin and tail risk.
+    Risk: Large jumps; dynamic hedging.
+
+---
+
+28. Price-to-Book Reversion
+    Intuition: Extreme P/B ratios mean-revert when fundamentals stable.
+    Signal (pseudo):
+    pb_z = zscore(P/B)
+    if pb_z > 2: short; if < -2: long
+    Universe/Frequency: Equities; monthly/quarterly.
+    Regions: Developed markets.
+    Backtest: Adjust for accounting differences.
+    Risk: Sector biases.
+
+---
+
+29. Event-Driven M&A Arbitrage
+    Intuition: Merger spreads close upon deal completion.
+    Signal (pseudo):
+    spread = target_price - acquirer_offer
+    trade spread with probabilistic completion model
+    Universe/Frequency: Corporate actions; event driven.
+    Regions: US, EU.
+    Backtest: Deal outcome modeling; financing costs.
+    Risk: Deal failure, regulatory.
+
+---
+
+30. Crypto Momentum with Vol Filter
+    Intuition: Crypto exhibits strong momentum when vol low.
+    Signal (pseudo):
+    mom = returns_30d
+    if realized_vol_14d < vol_thresh: take mom position with vol scaling
+    Universe/Frequency: BTC, ETH, liquid alts; daily.
+    Regions: Global exchanges.
+    Backtest: Exchange fees, funding rates.
+    Risk: Extreme tail events, custody.
+
+---
+
+31. Dollar Strength Mean Reversion
+    Intuition: Sharp USD moves often mean-revert short term.
+    Signal (pseudo):
+    usd_index_z = zscore(USD_index_returns_5d)
+    if z > th: short USD basket
+    Universe/Frequency: FX; daily.
+    Regions: G10.
+    Backtest: Funding costs.
+    Risk: Persistent macro shifts.
+
+---
+
+32. Options Put-Call Ratio Signal
+    Intuition: Extremes in put-call ratio predict short-term moves.
+    Signal (pseudo):
+    pcr = put_volume / call_volume
+    if pcr > upper_th: buy underlying
+    if pcr < lower_th: sell underlying
+    Universe/Frequency: Equities/indices; daily.
+    Regions: US.
+    Backtest: Use intraday timestamps.
+    Risk: Structural shifts in flow.
+
+---
+
+33. Retail Order Imbalance Predictive Alpha
+    Intuition: Large retail imbalances precede short-term reversals or continuations depending on context.
+    Signal (pseudo):
+    imbalance = retail_buys - retail_sells
+    if imbalance extreme and momentum strong: follow
+    else: fade
+    Universe/Frequency: Equities; intraday/daily.
+    Regions: US.
+    Backtest: Broker-sourced retail data.
+    Risk: Manipulation risk.
+
+---
+
+34. Inflation-Sensitive Asset Tilt
+    Intuition: Rising inflation benefits certain commodities and real assets.
+    Signal (pseudo):
+    if CPI_surprise > th: overweight commodities and TIPS underweight bonds
+    Universe/Frequency: Commodities, TIPS; monthly.
+    Regions: Global.
+    Backtest: Macro backtests; include roll.
+    Risk: Policy regime.
+
+---
+
+35. Cross-Sectional Momentum with Liquidity Scaling
+    Intuition: Momentum with position scaled by liquidity reduces impact.
+    Signal (pseudo):
+    mom = returns_90d_rank
+    size = base_size \* (liquidity_rank / max_rank)
+    Universe/Frequency: Equities; weekly.
+    Regions: Global.
+    Backtest: Impact model.
+    Risk: Execution cost.
+
+---
+
+36. Hedged Value (Long Value, Short Growth)
+    Intuition: Value outperforms growth over cycles; hedge market beta.
+    Signal (pseudo):
+    value_score = low PE, PB, high div
+    construct long value, short growth market-neutral
+    Universe/Frequency: Equities; monthly.
+    Regions: Developed markets.
+    Backtest: Factor neutrality checks.
+    Risk: Long value drawdowns.
+
+---
+
+37. Earnings Pre-Announcement Drift
+    Intuition: Stocks with pre-announcement positive signals often beat.
+    Signal (pseudo):
+    if insider buys, analyst upgrades before earnings: long pre-announcement
+    Universe/Frequency: Equities; event.
+    Regions: US.
+    Backtest: Use timestamps; avoid lookahead.
+    Risk: Information leakage ethics; regulatory.
+
+---
+
+38. Intraday Mean Reversion on Large Ticks
+    Intuition: Large ticks intraday often revert in short windows.
+    Signal (pseudo):
+    if 1min_return > threshold: short for n minutes
+    Universe/Frequency: Futures, FX; intraday.
+    Regions: US futures, FX.
+    Backtest: HF simulation.
+    Risk: Microstructure, latency.
+
+---
+
+39. Sentiment Momentum Using Newsflow Velocity
+    Intuition: Rapid increase in positive news volume accelerates price moves.
+    Signal (pseudo):
+    velocity = d/dt(news_sentiment)
+    if velocity > th: buy
+    Universe/Frequency: Equities; daily/intraday.
+    Regions: US, UK.
+    Backtest: Timestamped news.
+    Risk: Fake news, source reliability.
+
+---
+
+40. Supply Shock Commodity Alpha
+    Intuition: Supply disruptions create trends in commodity prices.
+    Signal (pseudo):
+    if supply_indicator shocks (inventory fall > x%): trend-follow on that commodity
+    Universe/Frequency: Commodities; weekly/monthly.
+    Regions: Global energy, metals.
+    Backtest: Use inventory datasets.
+    Risk: Rapid policy responses.
+
+---
+
+41. Cross-Sectional Earnings Quality
+    Intuition: Companies with high-quality earnings outperform low-quality.
+    Signal (pseudo):
+    quality = accruals_adj + cash_flow_ratio
+    rank and long top, short bottom
+    Universe/Frequency: Equities; quarterly.
+    Regions: Developed markets.
+    Backtest: Accounting adjustments.
+    Risk: Accounting regime differences.
+
+---
+
+42. Intraday Liquidity Provision (Make Market)
+    Intuition: Provide liquidity within spread capturing rebates/spread.
+    Signal (pseudo):
+    post limit orders around mid price for small sizes; cancel on volatility spike
+    Universe/Frequency: Highly liquid equities/futures; intraday.
+    Regions: US exchanges.
+    Backtest: Exchange fee schedules, queue priority.
+    Risk: Adverse selection, flash crashes.
+
+---
+
+43. Momentum in Analyst Coverage Growth
+    Intuition: Stocks gaining analyst coverage often receive flows.
+    Signal (pseudo):
+    if analyst_count_increase > th: buy
+    Universe/Frequency: Equities; monthly.
+    Regions: US, EU.
+    Backtest: Coverage dataset.
+    Risk: Small sample bias.
+
+---
+
+44. Volatility Regime Switch (Adaptive Trend)
+    Intuition: Switch between trend-following and mean-reversion by vol regime.
+    Signal (pseudo):
+    if realized_vol > vol_th: use mean-revert signals
+    else: use trend-follow signals
+    Universe/Frequency: Multi-asset futures; weekly.
+    Regions: Global.
+    Backtest: Regime detection robustness.
+    Risk: Regime misclassification.
+
+---
+
+45. Option Calendar Spread Alpha
+    Intuition: Calendar spreads exploit term-structure inefficiencies.
+    Signal (pseudo):
+    if front_month_IV > spot_expected_more_than_back: sell front buy back
+    Universe/Frequency: Options; monthly.
+    Regions: US.
+    Backtest: Transaction + margin.
+    Risk: Implied volatility moves.
+
+---
+
+46. Cross-Sectional Beta Neutral Momentum
+    Intuition: Remove market beta to isolate alpha.
+    Signal (pseudo):
+    compute betas; neutralize exposures; rank residual returns
+    Universe/Frequency: Equities; weekly.
+    Regions: Global.
+    Backtest: Factor neutrality checks.
+    Risk: Residual concentration.
+
+---
+
+47. Supply/Demand Imbalance in Treasury Auctions
+    Intuition: Auction demand reveals future yield moves.
+    Signal (pseudo):
+    if bid_to_cover < historical_avg: buy yields (short bonds)
+    Universe/Frequency: Government bonds; event-driven.
+    Regions: US, EU.
+    Backtest: Auction data history.
+    Risk: Policy surprises.
+
+---
+
+48. Crypto On-Chain Flow Momentum
+    Intuition: Net inflows/outflows to exchanges predict price moves.
+    Signal (pseudo):
+    net_flow = inflows - outflows
+    if net_flow significantly negative: buy (less supply on exchange)
+    Universe/Frequency: Major crypto; daily.
+    Regions: Global blockchain data.
+    Backtest: Exchange data; chain analysis.
+    Risk: Exchange reporting inconsistencies.
+
+---
+
+49. Cross-Sectional Momentum on ESG Revision
+    Intuition: Upgrades in ESG scores attract flows.
+    Signal (pseudo):
+    if ESG_score_change > th: buy
+    Universe/Frequency: Equities; monthly/quarterly.
+    Regions: Developed markets.
+    Backtest: ESG data revision timestamps.
+    Risk: Data subjectivity.
+
+---
+
+50. Intraday Order Flow Imbalance (VWAP Slippage)
+    Intuition: Persistent order flow in a direction causes slippage you can front-run.
+    Signal (pseudo):
+    if buy_imbalance > th: buy and scale out into flow
+    Universe/Frequency: Liquid equities/futures; intraday.
+    Regions: US.
+    Backtest: Broker-level flow data.
+
+---
+
+51. Momentum in Short-Dated Treasury Futures
+    Intuition: Short-term rate expectations trend around surprises.
+    Signal (pseudo):
+    mom = returns_10d(TBill_futures)
+    trade directional scaled by rate surprise
+    Universe/Frequency: Rates futures; daily.
+    Regions: US.
+    Backtest: Funding, roll costs.
+    Risk: Policy shifts.
+
+---
+
+52. Volatility Gap Reversion (Index Options)
+    Intuition: Sudden IV spikes revert over days.
+    Signal (pseudo):
+    if IV_jump > th: sell volatility, hedge delta
+    Universe/Frequency: Index options; weekly.
+    Regions: US, EU.
+    Backtest: Include hedging costs.
+    Risk: Continued stress.
+
+---
+
+53. Cross-Sectional Beta Timing via Macro Indicators
+    Intuition: Macro indicators predict when to increase/decrease equity beta.
+    Signal (pseudo):
+    if leading_indicator < th: reduce beta to bonds/cash
+    Universe/Frequency: Multi-asset; monthly.
+    Regions: Global.
+    Backtest: Macro dataset lag handling.
+    Risk: Late signals.
+
+---
+
+54. Sector Earnings Surprise Rotation
+    Intuition: Sectors beating EPS expectations continue to lead.
+    Signal (pseudo):
+    sector_surprise = avg_surprise_sector
+    overweight sectors with positive surprise
+    Universe/Frequency: Sector ETFs; monthly.
+    Regions: US, EU.
+    Backtest: Earnings calendar aggregation.
+    Risk: Sector crowding.
+
+---
+
+55. US-China Trade Tension Thematic Trade
+    Intuition: Geopolitical tension affects certain commodity and defense stocks.
+    Signal (pseudo):
+    if trade_tension_index increases: long defense, short cyclical exposure to China
+    Universe/Frequency: Multi-asset; event-driven.
+    Regions: Global.
+    Backtest: Geopolitical index construction.
+    Risk: Fast policy reversals.
+
+---
+
+56. Mean Reversion in High-Frequency Quote Spreads
+    Intuition: Spreads that widen then narrow present capture opportunities.
+    Signal (pseudo):
+    if spread > avg_spread\*factor: provide liquidity
+    Universe/Frequency: HF equities; microsecond/min data.
+    Regions: US.
+    Backtest: Exchange microstructure, rebates.
+    Risk: Adverse selection.
+
+---
+
+57. Rebalancing Window Alpha (Index Reconstitution)
+    Intuition: Index rebalancing creates predictable flows.
+    Signal (pseudo):
+    if stock added to index: buy ahead of reweighting
+    if removed: short ahead
+    Universe/Frequency: Index constituents; event-driven.
+    Regions: US, EU.
+    Backtest: Calendar of rebalances.
+    Risk: Announcement timing, front-running risk.
+
+---
+
+58. Corporate Buyback Intensity Alpha
+    Intuition: Firms engaging in buybacks boost EPS and share price.
+    Signal (pseudo):
+    if buyback_announced > th: buy
+    Universe/Frequency: Equities; event.
+    Regions: US.
+    Backtest: Use filing timestamps.
+    Risk: Buybacks financed by debt.
+
+---
+
+59. Cross-Sectional Reversal after Large 1-Day Moves
+    Intuition: Extremely large single-day moves often partially reverse.
+    Signal (pseudo):
+    if daily_return > x_sigma: take contrarian position small size
+    Universe/Frequency: Equities; daily.
+    Regions: US, EU.
+    Backtest: Avoid news-driven extremes.
+    Risk: Continued trend.
+
+---
+
+60. Volatility Term-Structure Roll Carry
+    Intuition: Roll down the curve in VIX futures yields carry when term structure in contango.
+    Signal (pseudo):
+    if front>back (contango): sell front, buy back roll strategy
+    Universe/Frequency: VIX futures; weekly.
+    Regions: US.
+    Backtest: Include roll, funding, margin.
+    Risk: Vol spikes.
+
+---
+
+61. Cross-Sectional Liquidity Event Response
+    Intuition: Stocks experiencing sudden liquidity contraction may overshoot.
+    Signal (pseudo):
+    if ADV drops > th and price gap: mean-revert small position
+    Universe/Frequency: Equities; daily.
+    Regions: EM, US small caps.
+    Backtest: Liquidity dataset.
+    Risk: Execution inability.
+
+---
+
+62. ETF Creation-Redemption Flow Predictive Alpha
+    Intuition: Persistent creations/redemptions indicate directional pressure on underlying.
+    Signal (pseudo):
+    if net_creations > th: long underlying basket
+    Universe/Frequency: ETFs & constituents; daily.
+    Regions: US, EU.
+    Backtest: Flow data.
+    Risk: Short-term reversals.
+
+---
+
+63. Mean Reversion on Overnight Index Swaps
+    Intuition: OIS deviations can indicate short-term funding pressure.
+    Signal (pseudo):
+    if OIS - FED_funds > th: trade rates futures expecting convergence
+    Universe/Frequency: Rates; daily.
+    Regions: US.
+    Backtest: Funding & margin.
+    Risk: Policy surprises.
+
+---
+
+64. Cross-Asset Momentum (Risk Parity Tilt)
+    Intuition: Rebalance across assets by momentum-adjusted risk parity.
+    Signal (pseudo):
+    compute momentum for assets; allocate risk parity weights tilted to momentum
+    Universe/Frequency: Multi-asset futures; monthly.
+    Regions: Global.
+    Backtest: Multi-decade data.
+    Risk: Correlation spikes.
+
+---
+
+65. Option Skew Reversion in Single Stocks
+    Intuition: Skew expansions around events revert.
+    Signal (pseudo):
+    if post-event skew drops significantly: buy protection cheap; or sell when skew high
+    Universe/Frequency: Single stock options; weekly.
+    Regions: US.
+    Backtest: Options liquidity.
+    Risk: Tail events.
+
+---
+
+66. Insider Selling as Short Signal (with controls)
+    Intuition: Aggressive insider selling can predict weakness.
+    Signal (pseudo):
+    if insider_sells > threshold and fundamentals deteriorate: short small size
+    Universe/Frequency: Equities; monthly.
+    Regions: US, AU.
+    Backtest: Filing lags.
+    Risk: Regulatory noise.
+
+---
+
+67. Volatility Mean Reversion across Commodities
+    Intuition: Commodity volatility spikes revert.
+    Signal (pseudo):
+    if realized_vol > IV by > th: short realized vol via options or futures
+    Universe/Frequency: Commodities; weekly.
+    Regions: Energy, metals.
+    Backtest: Option/futures costs.
+    Risk: Supply shocks.
+
+---
+
+68. Cross-Sectional Momentum in Frontier Markets
+    Intuition: Frontier markets show persistent momentum but high costs.
+    Signal (pseudo):
+    rank returns 90d; long top quintile with liquidity filter
+    Universe/Frequency: Frontier EM equities; monthly.
+    Regions: Africa, parts of Asia.
+    Backtest: Capital controls, settlement risk.
+    Risk: Execution, political.
+
+---
+
+69. Volatility-Adjusted Carry in FX
+    Intuition: Adjust carry exposures by realized vol to control risk.
+    Signal (pseudo):
+    score = carry / realized_vol
+    rank currencies, long high score, short low
+    Universe/Frequency: FX; monthly.
+    Regions: G10 and liquid EM.
+    Backtest: Funding, crisis stress.
+    Risk: Sudden devaluations.
+
+---
+
+70. ESG News Momentum
+    Intuition: Positive ESG news leads to inflows and outperformance.
+    Signal (pseudo):
+    if ESG_news_sentiment > th: buy and hold H days
+    Universe/Frequency: Equities; daily.
+    Regions: Developed markets.
+    Backtest: News feed timestamps.
+    Risk: PR spin, greenwashing.
+
+---
+
+71. Mean Reversion in Option Implied Correlation
+    Intuition: High implied correlation tends to mean-revert.
+    Signal (pseudo):
+    if implied_corr > hist_mean + th: sell index volatility, buy basket options
+    Universe/Frequency: Options; weekly.
+    Regions: US.
+    Backtest: Option costs and skew.
+    Risk: Systemic events.
+
+---
+
+72. Macro Surprise Hedged Equity Trade
+    Intuition: Hedge equity exposure based on macro surprise index.
+    Signal (pseudo):
+    if surprise_index negative: hedge equities with futures proportionally
+    Universe/Frequency: Equities; event-driven.
+    Regions: Global.
+    Backtest: Macro dataset.
+    Risk: Over-hedging during false signals.
+
+---
+
+73. Short-Term Reversal on High-Frequency Correlation
+    Intuition: Temporary correlation spikes revert and can be faded.
+    Signal (pseudo):
+    if corr(assetA, assetB)\_1h > corr_threshold: fade move in weaker asset
+    Universe/Frequency: HF multi-asset.
+    Regions: US, EU.
+    Backtest: HF data.
+    Risk: Latency.
+
+---
+
+74. Momentum in Real Estate Investment Trusts (REITs)
+    Intuition: REITs show momentum linked to rates and property cycles.
+    Signal (pseudo):
+    rank 60d returns of REITs; long top quintile
+    Universe/Frequency: REITs; monthly.
+    Regions: US, AU.
+    Backtest: Interest rate sensitivity adjustments.
+    Risk: Rate spikes, leverage.
+
+---
+
+75. Commodity Curve Trade (Backwardation/Contango)
+    Intuition: Structural curve shapes provide carry or roll cost opportunities.
+    Signal (pseudo):
+    if curve in strong backwardation: long spot futures for carry
+    Universe/Frequency: Commodities futures; monthly.
+    Regions: Energy, agriculture.
+    Backtest: Storage and roll costs.
+    Risk: Sudden contango shifts.
+
+---
+
+76. Cross-Sectional Momentum with ESG Tilt
+    Intuition: Momentum filtered for ESG leaders to capture flows into sustainable assets.
+    Signal (pseudo):
+    mom = rank(returns_90d)
+    filter by ESG_score > threshold
+    Universe/Frequency: Equities; monthly.
+    Regions: Developed markets.
+    Backtest: ESG dataset integrity.
+    Risk: Crowding in ESG winners.
+
+---
+
+77. Mean Reversion in Intraday Correlation between Stocks
+    Intuition: Intraday co-movement that spikes often normalizes.
+    Signal (pseudo):
+    if intraday_pair_corr > th: short the pair spread
+    Universe/Frequency: Liquid equities; intraday.
+    Regions: US.
+    Backtest: HF data.
+    Risk: Execution.
+
