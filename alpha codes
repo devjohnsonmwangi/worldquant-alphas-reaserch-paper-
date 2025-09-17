@@ -1,1 +1,258 @@
-graphical   analysis   of  ideas  comming  soon 
+## GLB Region - High Sharpe Alphas (Target > 5)
+
+**Simulation Settings for all Alphas**
+
+* Instrument Type: Equity
+* Region: GLB
+* Universe: MINVOL1M
+* Language: Fast Expression
+* Decay: 40
+* Delay: 1
+* Truncation: 0.05
+* Neutralization: Statistical
+* Pasteurization: On
+* NaN Handling: Off
+* Unit Handling: Verify
+* Max Trade: On
+
+---
+
+### 1. Seasonality × Close Score
+
+```
+alpha = ts_scale(oth176_hc_eq_seasonality , 80) * ts_rank(oth176_lmt_close_eq_score  , 200)
+```
+
+### 2. Momentum × Residual Mean Reversion
+
+```
+alpha = ts_scale(ts_mean(oth176_prc_eq_residual, 10) - ts_mean(oth176_prc_eq_residual, 60), 100) * ts_rank(oth176_lmt_close_eq_score, 150)
+```
+
+### 3. Seasonality × Reversal
+
+```
+alpha = ts_scale(oth176_hc_eq_seasonality, 90) * -ts_rank(ts_delta(oth176_lmt_close_eq_score, 5), 120)
+```
+
+### 4. Volatility Compression Breakout
+
+```
+alpha = ts_rank(ts_stddev(oth176_prc_eq_close, 20) / ts_stddev(oth176_prc_eq_close, 100), 150) * ts_scale(ts_delta(oth176_prc_eq_close, 1), 80)
+```
+
+### 5. Residual Carry × Price Acceleration
+
+```
+alpha = ts_scale(oth176_prc_eq_residual, 70) * ts_rank(ts_delta(oth176_prc_eq_close, 3) - ts_delta(oth176_prc_eq_close, 10), 200)
+```
+
+### 6. Fundamental Value Rotation
+
+```
+alpha = ts_scale(oth176_val_eq_score, 100) * -ts_rank(ts_zscore(oth176_prc_eq_close, 60), 180)
+```
+
+### 7. Seasonality Residual Overlay
+
+```
+alpha = ts_rank(oth176_hc_eq_seasonality, 120) * ts_scale(oth176_prc_eq_residual, 90)
+```
+
+### 8. Momentum + Volume Confirmation
+
+```
+alpha = ts_rank(ts_delta(oth176_prc_eq_close, 5), 160) * ts_scale(ts_zscore(oth176_vol_eq_score, 30), 100)
+```
+
+### 9. Skew Reversal Strategy
+
+```
+alpha = -ts_rank(ts_skew(oth176_prc_eq_close, 60), 150) * ts_scale(ts_zscore(oth176_prc_eq_close, 20), 80)
+```
+
+### 10. Price Mean Reversion × Fundamental Strength
+
+```
+alpha = -ts_rank(ts_zscore(oth176_prc_eq_close, 15), 120) * ts_scale(oth176_val_eq_score, 100)
+```
+
+### 11. Multi-horizon Momentum Blend
+
+```
+alpha = ts_scale(ts_delta(oth176_prc_eq_close, 5) + ts_delta(oth176_prc_eq_close, 20), 90) * ts_rank(oth176_lmt_close_eq_score, 200)
+```
+
+### 12. Long-term Residual Momentum
+
+```
+alpha = ts_rank(ts_mean(oth176_prc_eq_residual, 120), 180) * ts_scale(ts_zscore(oth176_prc_eq_close, 20), 100)
+```
+
+### 13. Volume Divergence Edge
+
+```
+alpha = ts_scale(ts_delta(oth176_vol_eq_score, 10) - ts_delta(oth176_vol_eq_score, 50), 90) * ts_rank(oth176_prc_eq_close, 150)
+```
+
+### 14. Mean Reversion Post-Volatility Spike
+
+```
+alpha = -ts_rank(ts_stddev(oth176_prc_eq_close, 10) / ts_stddev(oth176_prc_eq_close, 50), 140) * ts_scale(ts_zscore(oth176_prc_eq_close, 15), 100)
+```
+
+### 15. Residual Breakout + Close Strength
+
+```
+alpha = ts_scale(ts_zscore(oth176_prc_eq_residual, 60), 100) * ts_rank(oth176_lmt_close_eq_score, 200)
+```
+
+### 16. Value + Residual Carry
+
+```
+alpha = ts_scale(oth176_val_eq_score, 120) * ts_rank(oth176_prc_eq_residual, 80)
+```
+
+### 17. Seasonal Momentum Overlay
+
+```
+alpha = ts_scale(oth176_hc_eq_seasonality, 100) * ts_rank(ts_delta(oth176_prc_eq_close, 10), 150)
+```
+
+### 18. Price Compression Rebound
+
+```
+alpha = -ts_rank(ts_stddev(oth176_prc_eq_close, 20), 150) * ts_scale(ts_delta(oth176_prc_eq_close, 1), 90)
+```
+
+### 19. Volatility Breakout × Volume Surge
+
+```
+alpha = ts_rank(ts_stddev(oth176_prc_eq_close, 30), 160) * ts_scale(ts_zscore(oth176_vol_eq_score, 20), 100)
+```
+
+### 20. Residual Mean Reversion × Skew
+
+```
+alpha = -ts_rank(oth176_prc_eq_residual, 120) * ts_scale(ts_skew(oth176_prc_eq_close, 40), 100)
+```
+
+### 21. Trend-Following Residual Score
+
+```
+alpha = ts_rank(ts_delta(oth176_prc_eq_residual, 15), 140) * ts_scale(ts_zscore(oth176_lmt_close_eq_score, 30), 100)
+```
+
+### 22. Momentum Cross-Horizon
+
+```
+alpha = ts_rank(ts_delta(oth176_prc_eq_close, 5) - ts_delta(oth176_prc_eq_close, 30), 180) * ts_scale(oth176_val_eq_score, 80)
+```
+
+### 23. Reversal After Price Spike
+
+```
+alpha = -ts_rank(ts_delta(oth176_prc_eq_close, 3), 150) * ts_scale(ts_zscore(oth176_prc_eq_close, 20), 100)
+```
+
+### 24. Fundamental Anchored Momentum
+
+```
+alpha = ts_scale(oth176_val_eq_score, 90) * ts_rank(ts_delta(oth176_prc_eq_close, 20), 180)
+```
+
+### 25. Residual Oscillation Capture
+
+```
+alpha = ts_rank(ts_sin(oth176_prc_eq_residual), 150) * ts_scale(ts_zscore(oth176_prc_eq_close, 25), 100)
+```
+
+### 26. Residual Divergence + Value
+
+```
+alpha = ts_scale(oth176_prc_eq_residual - ts_mean(oth176_prc_eq_residual, 60), 100) * ts_rank(oth176_val_eq_score, 150)
+```
+
+### 27. Seasonality Momentum Hybrid
+
+```
+alpha = ts_scale(oth176_hc_eq_seasonality, 80) * ts_rank(ts_delta(oth176_lmt_close_eq_score, 15), 150)
+```
+
+### 28. Residual Mean Reversion × Volume
+
+```
+alpha = -ts_rank(ts_zscore(oth176_prc_eq_residual, 20), 160) * ts_scale(oth176_vol_eq_score, 90)
+```
+
+### 29. Trend Following × Skew Suppression
+
+```
+alpha = ts_rank(ts_delta(oth176_prc_eq_close, 20), 180) * -ts_scale(ts_skew(oth176_prc_eq_close, 50), 100)
+```
+
+### 30. Value Rotation with Residual Confirm
+
+```
+alpha = ts_scale(oth176_val_eq_score, 100) * ts_rank(oth176_prc_eq_residual, 150)
+```
+
+### 31. Short-Term Mean Reversion Spike
+
+```
+alpha = -ts_rank(ts_zscore(oth176_prc_eq_close, 5), 120) * ts_scale(oth176_lmt_close_eq_score, 100)
+```
+
+### 32. High Residual × Low Vol Filter
+
+```
+alpha = ts_rank(oth176_prc_eq_residual, 180) * -ts_scale(ts_stddev(oth176_prc_eq_close, 50), 80)
+```
+
+### 33. Long-Term Carry vs Reversal Blend
+
+```
+alpha = ts_scale(ts_mean(oth176_prc_eq_residual, 90), 100) * -ts_rank(ts_delta(oth176_prc_eq_close, 3), 150)
+```
+
+### 34. Price Acceleration × Seasonality
+
+```
+alpha = ts_scale(ts_delta(oth176_prc_eq_close, 3) - ts_delta(oth176_prc_eq_close, 10), 90) * ts_rank(oth176_hc_eq_seasonality, 150)
+```
+
+### 35. Residual Overlay + Close Zscore
+
+```
+alpha = ts_rank(oth176_prc_eq_residual, 150) * ts_scale(ts_zscore(oth176_prc_eq_close, 20), 100)
+```
+
+### 36. Value Anchored Skew Reversal
+
+```
+alpha = -ts_rank(ts_skew(oth176_prc_eq_close, 40), 160) * ts_scale(oth176_val_eq_score, 100)
+```
+
+### 37. Volatility Normalization Trend
+
+```
+alpha = ts_rank(ts_delta(oth176_prc_eq_close, 15), 150) * -ts_scale(ts_stddev(oth176_prc_eq_close, 60), 100)
+```
+
+### 38. Multi-Window Residual Carry
+
+```
+alpha = ts_scale(ts_mean(oth176_prc_eq_residual, 20) + ts_mean(oth176_prc_eq_residual, 100), 100) * ts_rank(oth176_prc_eq_close, 150)
+```
+
+### 39. Volume Spike Mean Reversion
+
+```
+alpha = -ts_rank(ts_zscore(oth176_vol_eq_score, 10), 150) * ts_scale(ts_delta(oth176_prc_eq_close, 1), 100)
+```
+
+### 40. Residual Rebound + Value Overlay
+
+```
+alpha = ts_scale(ts_zscore(oth176_prc_eq_residual, 30), 100) * ts_rank(oth176_val_eq_score, 180)
+```
